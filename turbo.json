@@ -15,6 +15,10 @@
     "generate": {
       "dependsOn": ["^generate"]
     },
-    "lint": {}
+    "lint": {},
+    "test": {},
+    "start": {
+      "cache": false
+    }
   }
 }
