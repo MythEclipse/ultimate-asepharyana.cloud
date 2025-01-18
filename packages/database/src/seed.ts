@@ -1,15 +1,15 @@
-import { prisma } from "./client";
+import { prisma } from './client';
 
-import type { User } from "@prisma/client";
+import type { User } from '@prisma/client';
 
 const DEFAULT_USERS = [
   {
-    name: "Asep Haryana",
-    email: "asep.haryana@gmail.com",
+    name: 'Asep Haryana',
+    email: 'asep.haryana@gmail.com',
   },
   {
-    name: "Demo User",
-    email: "demo@example.com",
+    name: 'Demo User',
+    email: 'demo@example.com',
   },
 ] as Array<Partial<User>>;
 
@@ -30,7 +30,7 @@ const DEFAULT_USERS = [
         })
       )
     );
-    console.log("Seed completed successfully");
+    console.log('Seed completed successfully');
   } catch (error) {
     console.error(error);
     process.exit(1);

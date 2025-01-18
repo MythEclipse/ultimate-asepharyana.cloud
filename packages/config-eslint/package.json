@@ -7,10 +7,11 @@
     "next.js"
   ],
   "devDependencies": {
+    "@types/node": "22.10.7",
     "@typescript-eslint/eslint-plugin": "^8.20.0",
     "@typescript-eslint/parser": "^8.20.0",
-    "@types/node":"22.10.7",
     "eslint": "^9.18.0",
+    "eslint-config-next": "^15.1.5",
     "eslint-config-prettier": "^10.0.1",
     "eslint-config-turbo": "^2.3.3",
     "eslint-plugin-only-warn": "^1.1.0",
