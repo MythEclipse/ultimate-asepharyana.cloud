@@ -51,6 +51,7 @@ yarn-error.log*
 .env
 /.env
 !packages/database/.env
+!apps/web/.env
 
 # vercel
 .vercel
