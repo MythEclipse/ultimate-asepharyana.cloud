@@ -1,28 +1,132 @@
-## Getting Started
+# @asepharyana/asepharyana.my.id
 
-First, run the development server:
+## Overview
 
-```bash
-yarn dev
-```
+Welcome to my personal website project. This project is built with Next.js and incorporates various modern technologies and tools to deliver a smooth and dynamic user experience.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Demo
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You can view the live demo of the project here: [asepharyana](https://asepharyana.my.id).
 
-To create [API routes](https://nextjs.org/docs/app/building-your-application/routing/router-handlers) add an `api/` directory to the `app/` directory with a `route.ts` file. For individual endpoints, create a subfolder in the `api` directory, like `api/hello/route.ts` would map to [http://localhost:3000/api/hello](http://localhost:3000/api/hello).
+### Features
 
-## Learn More
+- **Modern Framework:** Built with Next.js 14 for a robust and scalable architecture.
+- **Full-Stack Support:** Includes Prisma, Firebase, and MongoDB for comprehensive data management.
+- **Enhanced User Interface:** Utilizes Tailwind CSS, Flowbite, and various React components for a polished look.
+- **Internationalization:** Supports multiple languages with Next-Intl for a global audience.
 
-To learn more about Next.js, take a look at the following resources:
+### Installation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn/foundations/about-nextjs) - an interactive Next.js tutorial.
+To get started with this project locally, follow these steps:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+#### Setup pnpm
 
-## Deploy on Vercel
+**On Windows:**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_source=github.com&utm_medium=referral&utm_campaign=turborepo-readme) from the creators of Next.js.
+1. Install `pnpm` globally using `npm`:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+    ```cmd
+    npm install -g pnpm
+    ```
+
+2. Clone the repository:
+
+    ```cmd
+    git clone https://github.com/Asepharyana71/asepharyana.my.id.git
+    ```
+
+3. Navigate into the project directory:
+
+    ```cmd
+    cd asepharyana.my.id
+    ```
+
+4. Install the dependencies:
+
+    ```cmd
+    pnpm install
+    ```
+
+5. Run the development server:
+
+    ```cmd
+    pnpm run dev
+    ```
+
+**On Linux:**
+
+1. Install `pnpm` globally using `curl`:
+
+    ```bash
+    curl -fsSL https://get.pnpm.io/v6/install.sh | sh
+    ```
+
+2. Clone the repository:
+
+    ```bash
+    git clone https://github.com/Asepharyana71/asepharyana.my.id.git
+    ```
+
+3. Navigate into the project directory:
+
+    ```bash
+    cd asepharyana.my.id
+    ```
+
+4. Install the dependencies:
+
+    ```bash
+    pnpm install
+    ```
+
+5. Run the development server:
+
+    ```bash
+    pnpm run dev
+    ```
+
+### Scripts
+
+- `dev` - Start the development server with Turbo mode on port 3090.
+- `build` - Build the production-ready application.
+- `start` - Start the production server on port 3090.
+- `lint` - Run ESLint for code linting.
+- `lint:debug` - Run ESLint with debug mode enabled.
+- `lint:fix` - Automatically fix linting issues.
+- `migrate` - Run Prisma database migrations and generate the Prisma client.
+- `studio` - Open Prisma Studio for database management.
+- `format` - Format code using Prettier.
+- `prepare` - Set up Husky for Git hooks.
+- `check-types` - Check TypeScript types.
+- `check-format` - Check code formatting.
+- `check-lint` - Check linting status.
+
+### Dependencies
+
+- Next.js
+- React & React DOM
+- Tailwind CSS
+- Prisma
+- Firebase
+- Flowbite
+- Formik
+- And many more...
+
+### Dev Dependencies
+
+- ESLint & Prettier for code quality
+- TypeScript for type safety
+- Husky for Git hooks
+- Autoprefixer for CSS compatibility
+
+### Coming Soon
+
+Stay tuned for more updates and features!
+
+## Contributing
+
+Feel free to submit issues or pull requests. Contributions are welcome!
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

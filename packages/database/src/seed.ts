@@ -3,10 +3,13 @@ import { prisma } from "./client";
 import type { User } from "@prisma/client";
 
 const DEFAULT_USERS = [
-  // Add your own user to pre-populate the database with
   {
-    name: "Tim Apple",
-    email: "tim@apple.com",
+    name: "Asep Haryana",
+    email: "asep.haryana@gmail.com",
+  },
+  {
+    name: "Demo User",
+    email: "demo@example.com",
   },
 ] as Array<Partial<User>>;
 
@@ -27,6 +30,7 @@ const DEFAULT_USERS = [
         })
       )
     );
+    console.log("Seed completed successfully");
   } catch (error) {
     console.error(error);
     process.exit(1);

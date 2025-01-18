@@ -7,9 +7,12 @@ node_modules
 /node_modules
 .pnp
 /.pnp
+homebrew
 /homebrew
 .pnp.js
+/.pnp.js
 .yarn/install-state.gz
+/yarn/install-state.gz
 public/sitemap.xml
 
 # testing
@@ -21,11 +24,12 @@ coverage
 /.next/
 out/
 /out/
-/build
 build
+/build
 
 # misc
 .DS_Store
+/*.DS_Store
 *.pem
 
 # debug
@@ -35,30 +39,46 @@ yarn-error.log*
 
 # local env files
 .env*.local
+/.env*.local
 .env.local
+/.env.local
 .env.development.local
+/.env.development.local
 .env.test.local
+/.env.test.local
 .env.production.local
+/.env.production.local
 .env
+/.env
 !packages/database/.env
 
 # vercel
 .vercel
+/.vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+/next-env.d.ts
 
 # public files
 public/sw.js
+/public/sw.js
 public/swe-worker-*.js
+/public/swe-worker-*.js
 public/workbox-*.js
+/public/workbox-*.js
 public/sitemap.xml
+/public/sitemap.xml
 public/robots.txt
+/public/robots.txt
 public/sitemap-0.xml
+/public/sitemap-0.xml
 
 # logs
 app.log
+/app.log
 
 # turbo
 .turbo
+/.turbo

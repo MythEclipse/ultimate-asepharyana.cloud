@@ -1,6 +1,6 @@
 {
-  "name": "@repo/typescript-config",
-  "version": "0.0.0",
+  "name": "@asepharyana/typescript-config",
+  "version": "0.1.0",
   "private": true,
   "publishConfig": {
     "access": "public"

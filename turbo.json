@@ -8,7 +8,6 @@
     },
     "db:migrate:deploy": {},
     "db:push": {},
-    "db:seed": {},
     "dev": {
       "cache": false,
       "persistent": true
