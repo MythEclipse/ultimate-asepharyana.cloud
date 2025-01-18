@@ -1,1 +1,0 @@
- pnpm install && npm run migrate && pnpm run dev

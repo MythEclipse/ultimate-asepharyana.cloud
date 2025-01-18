@@ -22,7 +22,7 @@
       "@/*": ["./*"]
     },
     "target": "esnext",
-    "types": ["node", "jest", "@testing-library/jest-dom"],
+    "types": ["node"],
     "allowSyntheticDefaultImports": true,
     "useDefineForClassFields": true
   },
