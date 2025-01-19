@@ -1,33 +1,29 @@
-import { FlatCompat } from '@eslint/eslintrc';
+import { FlatCompat } from "@eslint/eslintrc";
 
 const compat = new FlatCompat({
   baseDirectory: process.cwd(),
 });
 
-const eslintConfig = [
-  ...compat.config({
-    extends: [
-      'next/core-web-vitals',
-      'next/typescript',
-      'prettier',
-      'plugin:@next/next/recommended',
-    ],
-    rules: {
-      '@typescript-eslint/no-unused-vars': 'off',
-    },
-  }),
-  {
-    ignores: [
-      '**/node_modules/**',
-      '**/.git/**',
-      '**/public/**',
-      '**/dist/**',
-      '**/build/**',
-      '**/.next/**',
-      '**/out/**',
-      '**/coverage/**',
-    ],
-  },
-];
+const loadConfig = async () => {
+  const library = await import('./library.js');
+  
+  const eslintConfig = [
+    ...compat.config({
+      extends: library.default.extends,
+      parser: "@typescript-eslint/parser",
+      parserOptions: {
+        project: "./tsconfig.json",
+      },
+      plugins: library.default.plugins,
+      globals: library.default.globals,
+      env: library.default.env,
+      settings: library.default.settings,
+      ignorePatterns: library.default.ignorePatterns,
+      overrides: library.default.overrides,
+    }),
+  ];
 
-export default eslintConfig;
+  return eslintConfig;
+};
+
+export default await loadConfig();

@@ -1,5 +1,5 @@
 {
-  "name": "@asepharyana/typescript-config",
+  "name": "@asepharyana/config-typescript",
   "version": "0.1.0",
   "private": true,
   "publishConfig": {

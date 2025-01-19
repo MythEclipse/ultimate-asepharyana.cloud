@@ -20,8 +20,8 @@
     "@prisma/client": "^6.2.1"
   },
   "devDependencies": {
-    "@asepharyana/eslint-config": "workspace:*",
-    "@asepharyana/typescript-config": "workspace:*",
+    "@asepharyana/config-typescript": "workspace:*",
+    "@asepharyana/config-eslint" : "workspace:*",
     "@types/node": "^22.10.7",
     "eslint": "^9.18.0",
     "prisma": "^6.2.1",

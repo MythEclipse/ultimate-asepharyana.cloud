@@ -1,35 +1,33 @@
-const { resolve } = require("node:path");
+import { FlatCompat } from "@eslint/eslintrc";
 
-const project = resolve(process.cwd(), "tsconfig.json");
+const compat = new FlatCompat({
+  baseDirectory: process.cwd(),
+});
 
-/** @type {import("eslint").Linter.Config} */
-module.exports = {
-  extends: [
-    "eslint:recommended",
-    "prettier",
-    require.resolve("@vercel/style-guide/eslint/next"),
-    "turbo",
-    "plugin:prettier/recommended"
-  ],
-  globals: {
-    React: true,
-    JSX: true,
-  },
-  env: {
-    node: true,
-  },
-  plugins: ["only-warn", "prettier"],
-  settings: {
-    "import/resolver": {
-      typescript: {
-        project,
-      },
+const eslintConfig = [
+  ...compat.config({
+    extends: [
+      'next/core-web-vitals',
+      'next/typescript',
+      'prettier',
+      'plugin:@next/next/recommended',
+    ],
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
     },
+  }),
+  {
+    ignores: [
+      '**/node_modules/**',
+      '**/.git/**',
+      '**/public/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/.next/**',
+      '**/out/**',
+      '**/coverage/**',
+    ],
   },
-  ignorePatterns: [
-    // Ignore dotfiles
-    ".*.js",
-    "node_modules/",
-  ],
-  overrides: [{ files: ["*.js?(x)", "*.ts?(x)"] }],
-};
+];
+
+export default eslintConfig;

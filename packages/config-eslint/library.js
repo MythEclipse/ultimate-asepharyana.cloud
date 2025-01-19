@@ -1,11 +1,13 @@
-const { resolve } = require("node:path");
+import { resolve } from "node:path";
+import { FlatCompat } from "@eslint/eslintrc";
+
+const compat = new FlatCompat({
+  baseDirectory: process.cwd(),
+});
 
 const project = resolve(process.cwd(), "tsconfig.json");
 
-/** @type {import("eslint").Linter.Config} */
-module.exports = {
-  extends: ["eslint:recommended", "prettier", "turbo", "plugin:prettier/recommended"],
-  plugins: ["only-warn", "prettier"],
+const baseConfig = {
   globals: {
     React: true,
     JSX: true,
@@ -21,7 +23,6 @@ module.exports = {
     },
   },
   ignorePatterns: [
-    // Ignore dotfiles
     ".*.js",
     "node_modules/",
     "dist/",
@@ -32,3 +33,13 @@ module.exports = {
     },
   ],
 };
+
+const config = {
+  extends: [
+    "prettier",
+  ],
+  plugins: ["only-warn", "prettier"],
+  ...baseConfig,
+};
+
+export default config;

@@ -1,4 +1,5 @@
 {
+  "extends": "@asepharyana/config-eslint/tsconfig.json",
   "compilerOptions": {
     "forceConsistentCasingInFileNames": true,
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -33,7 +34,13 @@
     ".next/types/**/*.ts",
     "jest.config.ts",
     "app/(backend)/api/komik/[function]/route.ts.bak",
-    "eslint.config.mjs"
+    "eslint.config.mjs",
+    "next.config.js",
+    "ecosystem.config.js",
+    "postcss.config.mjs",
+    "tailwind.config.js",
+    "prettier.config.js",
+    "next-sitemap.config.js"
   ],
   "exclude": ["node_modules", "!node_modules/.prisma"]
 }

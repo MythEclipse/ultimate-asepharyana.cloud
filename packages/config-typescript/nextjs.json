@@ -2,21 +2,42 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "./base.json",
   "compilerOptions": {
-    "plugins": [{ "name": "next" }],
-    "target": "es5",
+    "forceConsistentCasingInFileNames": true,
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
-    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
-    "incremental": true,
     "esModuleInterop": true,
     "module": "esnext",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "target": "esnext",
+    "types": ["node", "jest", "@testing-library/jest-dom"],
+    "allowSyntheticDefaultImports": true,
+    "useDefineForClassFields": true
   },
-  "include": ["src", "next-env.d.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.js",
+    "**/*.tsx",
+    "**/*.config.js",
+    ".next/types/**/*.ts",
+    "jest.config.ts",
+    "app/(backend)/api/komik/[function]/route.ts.bak",
+    "eslint.config.mjs"
+  ],
+  "exclude": ["node_modules", "!node_modules/.prisma"]
 }
