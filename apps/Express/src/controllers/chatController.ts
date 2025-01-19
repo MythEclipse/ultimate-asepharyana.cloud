@@ -10,18 +10,25 @@ export default function handleConnection(ws: WebSocket) {
   clients.add(ws);
   logger.info('New client connected');
 
+  // Set unique user ID for this connection
+  const userId = `User-${Math.floor(Math.random() * 1000)}`;
+  (ws as any).userId = userId;
+
   // Load recent messages and send to the new client
-  chatService.loadMessages().then((messages) => {
-    messages.reverse().forEach((message) => {
-      ws.send(JSON.stringify(message));
+  chatService
+    .loadMessages()
+    .then((messages) => {
+      messages.reverse().forEach((message) => {
+        ws.send(JSON.stringify(message));
+      });
+    })
+    .catch((error) => {
+      logger.error('Failed to load messages', error);
     });
-  }).catch((error) => {
-    logger.error('Failed to load messages', error);
-  });
 
   ws.on('message', async (data) => {
     const message: ChatMessage = {
-      user: `User-${Math.floor(Math.random() * 1000)}`,
+      user: (ws as any).userId, // Use the stored user ID
       text: data.toString(),
     };
 
@@ -45,6 +52,6 @@ export default function handleConnection(ws: WebSocket) {
 
   ws.on('close', () => {
     clients.delete(ws);
-    logger.info('Client disconnected');
+    logger.info(`Client disconnected: ${userId}`);
   });
 }

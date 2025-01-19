@@ -1,5 +1,5 @@
 {
-  "name": "express-asepharyana-cloud",
+  "name": "@asepharyana/express",
   "version": "1.0.0",
   "type": "module",
   "description": "",
@@ -13,8 +13,7 @@
     "lint": "eslint . --fix",
     "check-types": "tsc --noEmit",
     "check-format": "prettier --check .",
-    "check-lint": "eslint . --ext ts --ext tsx --ext js --ext jsx",
-    "prepare": "husky"
+    "check-lint": "eslint . --ext ts --ext tsx --ext js --ext jsx"
   },
   "author": "",
   "license": "ISC",
