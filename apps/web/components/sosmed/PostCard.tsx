@@ -185,7 +185,7 @@ export default function PostCard({
                   />
                   <ButtonA
                     onClick={() => handleEditCommentSubmit(comment.id)}
-                    className='py-1 w-full bg-blue-600 rounded-full hover:bg-blue-700 transition duration-300'
+                    className='py-1 w-full  '
                   >
                     Save Changes
                   </ButtonA>

@@ -7,6 +7,7 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.config({
     extends: [
+      "plugin:@next/next/recommended",
       'next/core-web-vitals',
       'next/typescript',
       'prettier',
