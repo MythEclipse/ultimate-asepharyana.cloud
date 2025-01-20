@@ -16,7 +16,8 @@ This turborepo includes the following packages/apps:
 
 ### Apps and Packages
 
-- `@asepharyana/web`: a [ repo asepharyana.cloud](https://github.com/MythEclipse/asepharyana.cloud) app
+- `@asepharyana/web`: a [asepharyana.cloud(nextjs)](https://github.com/MythEclipse/asepharyana.cloud) app
+- `@asepharyana/web`: a [express](https://github.com/MythEclipse/API) app
 - `@asepharyana/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
 - `@asepharyana/database`: [Prisma](https://prisma.io/) ORM wrapper to manage & access your database
 - `@asepharyana/typescript-config`: `tsconfig.json`s used throughout the monorepo

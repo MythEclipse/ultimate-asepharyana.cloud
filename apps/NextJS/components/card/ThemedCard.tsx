@@ -9,8 +9,8 @@ interface CardProps {
 
 export default function CardB({ children }: CardProps) {
   return (
-    <ShadcnCard className='w-full h-full bg-white dark:bg-black overflow-hidden text-blue-500 bg-transparent border rounded-lg shadow-lg shadow-blue-500/50'>
+    <div className='p-6 shadow-xl bg-white dark:bg-black border border-blue-500 dark:border-blue-500 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500'>
       {children}
-    </ShadcnCard>
+    </div>
   );
 }

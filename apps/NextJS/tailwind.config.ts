@@ -1,4 +1,4 @@
- import type { Config } from 'tailwindcss';
+import type { Config } from 'tailwindcss';
 import flowbite from 'flowbite/plugin';
 import tailwindcssAnimate from 'tailwindcss-animate';
 
@@ -26,7 +26,8 @@ const config: Config = {
     extend: {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'gradient-conic':
+          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
       fontFamily: {
         body: [
@@ -140,25 +141,25 @@ const config: Config = {
             height: '0',
           },
         },
-        'beam': {
+        beam: {
           '0%': { transform: 'translateY(-200px)', opacity: '1' },
-          '100%': { transform: 'translateY(120vh)', opacity: '0' }
+          '100%': { transform: 'translateY(120vh)', opacity: '0' },
         },
-        'explosion': {
+        explosion: {
           '0%': { opacity: '1', transform: 'scale(1)' },
-          '100%': { opacity: '0', transform: 'scale(2)' }
+          '100%': { opacity: '0', transform: 'scale(2)' },
         },
         'explosion-particle': {
           '0%': { transform: 'scale(1)', opacity: '1' },
-          '100%': { transform: 'scale(0)', opacity: '0' }
-        }
+          '100%': { transform: 'scale(0)', opacity: '0' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'beam': 'beam 8s linear infinite',
-        'explosion': 'explosion 1s ease-out forwards',
-        'explosion-particle': 'explosion-particle 1s ease-out forwards'
+        beam: 'beam 8s linear infinite',
+        explosion: 'explosion 1s ease-out forwards',
+        'explosion-particle': 'explosion-particle 1s ease-out forwards',
       },
     },
   },

@@ -199,8 +199,8 @@ export default function PostPage() {
         Social Feed
       </h1>
       {session ? (
-        <Card>
-          <div className='p-6 mb-8 shadow-xl rounded-lg bg-white dark:bg-black'>
+        <div className='mb-8'>
+          <Card>
             <Textarea
               placeholder="What's on your mind?"
               value={content}
@@ -219,20 +219,24 @@ export default function PostPage() {
             >
               {isUploading ? 'Uploading...' : 'Post'}
             </button>
-          </div>
-        </Card>
+          </Card>
+        </div>
       ) : (
-        <Card>
-          <div className='p-6 mb-8 shadow-xl rounded-lg bg-white dark:bg-black text-center'>
+        <div className='mb-8'>
+          <Card>
             <p className='text-gray-800 dark:text-gray-100'>
               You must be logged in to create a post.
             </p>
-          </div>
-        </Card>
+          </Card>
+        </div>
       )}
 
       {/* Loading Indicator */}
-      {isValidating && <div className='text-center py-4'>Loading...</div>}
+      {isValidating && (
+        <div className='fixed top-[70px] left-1/2 transform -translate-x-1/2 bg-blue-600 p-2 rounded-full shadow-lg z-50'>
+          <div className='w-6 h-6 border-4 border-t-transparent border-white rounded-full animate-spin'></div>
+        </div>
+      )}
 
       <div className='grid gap-8'>
         {postsData?.posts?.map(

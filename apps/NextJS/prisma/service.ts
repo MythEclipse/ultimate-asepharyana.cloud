@@ -17,7 +17,9 @@ export async function loginWithGoogle(
 ) {
   try {
     // Check if user already exists
-    let user = await prisma.user.findUnique({ where: { email: userData.email } });
+    let user = await prisma.user.findUnique({
+      where: { email: userData.email },
+    });
 
     if (!user) {
       // If the user does not exist, create a new user
@@ -90,7 +92,6 @@ export async function loginWithGoogle(
 //     };
 //   }
 // }
-
 
 export async function getUserById(id: string) {
   return await prisma.user.findUnique({ where: { id } });
