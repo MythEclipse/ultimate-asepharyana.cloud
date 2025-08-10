@@ -1,7 +1,3 @@
-'use client';
-
-import useSWR from 'swr';
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import UnifiedGrid from 'components/UnifiedGrid';
 import {
@@ -39,75 +35,24 @@ interface Pagination {
   previous_page: number | null;
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+export default async function AnimePage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
+  const API_URL = process.env.NEXT_PUBLIC_URL;
 
-export default function AnimePage() {
-  const params = useParams();
-  const slug = params.slug as string;
-  const { data, error, isLoading } = useSWR<OngoingAnimeData | null>(
-    `/api/anime/ongoing-anime/${slug}`,
-    fetcher,
-    {
-      revalidateOnFocus: false,
+  let data: OngoingAnimeData | null = null;
+  let error: unknown = null;
+
+  try {
+    const res = await fetch(`${API_URL}/api/anime/ongoing-anime/${slug}`);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch data: ${res.statusText}`);
     }
-  );
-
-  if (isLoading) {
-    return (
-      <main className='p-4 md:p-8 bg-background dark:bg-dark min-h-screen'>
-        <div className='max-w-7xl mx-auto'>
-          {/* <h1 className='text-4xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400'>
-                    Anime
-                </h1> */}
-
-          {/* Ongoing Anime Section */}
-          <section className='mb-12 space-y-6'>
-            <div className='flex items-center justify-between mb-6'>
-              <div className='flex items-center gap-3'>
-                <div className='p-3 bg-blue-100 dark:bg-blue-900/50 rounded-xl'>
-                  <Clapperboard className='w-6 h-6 text-blue-600 dark:text-blue-400' />
-                </div>
-                <h2 className='text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>
-                  Ongoing Anime
-                </h2>
-              </div>
-              <div className='flex items-center gap-2 text-blue-600 dark:text-blue-400'>
-                <span className='skeleton w-16 h-4 rounded'></span>
-                <ArrowRight className='w-4 h-4' />
-              </div>
-            </div>
-
-            <UnifiedGrid items={[]} loading={true} itemType="anime" />
-          </section>
-
-          {/* Complete Anime Section */}
-          {/* <section className='space-y-6'>
-                    <div className='flex items-center justify-between mb-6'>
-                        <div className='flex items-center gap-3'>
-                            <div className='p-3 bg-green-100 dark:bg-green-900/50 rounded-xl'>
-                                <CheckCircle className='w-6 h-6 text-green-600 dark:text-green-400' />
-                            </div>
-                            <h2 className='text-2xl font-bold bg-gradient-to-r from-green-600 to-purple-600 bg-clip-text text-transparent'>
-                                Complete Anime
-                            </h2>
-                        </div>
-                        <div className='flex items-center gap-2 text-green-600 dark:text-green-400'>
-                            <span className='skeleton w-16 h-4 rounded'></span>
-                            <ArrowRight className='w-4 h-4' />
-                        </div>
-                    </div>
-
-                    <AnimeGrid
-                        animes={[]}
-                        loading={true}
-                    />
-                </section> */}
-        </div>
-      </main>
-    );
+    data = await res.json();
+  } catch (e) {
+    error = e;
   }
 
-  if (error || !data) {
+  if (error) {
     return (
       <main className='min-h-screen p-6 bg-background dark:bg-dark'>
         <div className='max-w-7xl mx-auto mt-12'>
@@ -118,8 +63,7 @@ export default function AnimePage() {
                 Error Loading Data
               </h1>
               <p className='text-red-700 dark:text-red-300'>
-                {error?.message ||
-                  'Could not fetch data from the API. Please try again later.'}
+                Could not fetch data from the API. Please try again later.
               </p>
             </div>
           </div>
@@ -128,57 +72,27 @@ export default function AnimePage() {
     );
   }
 
-  if (!Array.isArray(data.data)) {
+  if (!data || !Array.isArray(data.data)) {
     return (
       <main className='p-4 md:p-8 bg-background dark:bg-dark min-h-screen'>
-        <div className='max-w-7xl mx-auto'>
-          {/* <h1 className='text-4xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400'>
-                    Anime
-                </h1> */}
-
-          {/* Ongoing Anime Section */}
-          <section className='mb-12 space-y-6'>
-            <div className='flex items-center justify-between mb-6'>
-              <div className='flex items-center gap-4'>
-                <div className='p-3 bg-blue-100 dark:bg-blue-900/50 rounded-xl'>
-                  <Clapperboard className='w-8 h-8 text-blue-600 dark:text-blue-400' />
-                </div>
-                <h1 className='text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>
-                  Currently Airing Anime
-                </h1>
+        <section className='mb-12 space-y-6'>
+          <div className='flex items-center justify-between mb-6'>
+            <div className='flex items-center gap-3'>
+              <div className='p-3 bg-blue-100 dark:bg-blue-900/50 rounded-xl'>
+                <Clapperboard className='w-6 h-6 text-blue-600 dark:text-blue-400' />
               </div>
-              <div className='flex items-center gap-2 text-blue-600 dark:text-blue-400'>
-                <span className='skeleton w-16 h-4 rounded'></span>
-                <ArrowRight className='w-4 h-4' />
-              </div>
+              <h2 className='text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>
+                Ongoing Anime
+              </h2>
             </div>
+            <div className='flex items-center gap-2 text-blue-600 dark:text-blue-400'>
+              <span className='skeleton w-16 h-4 rounded'></span>
+              <ArrowRight className='w-4 h-4' />
+            </div>
+          </div>
 
-            <UnifiedGrid items={[]} loading={true} itemType="anime" />
-          </section>
-
-          {/* Complete Anime Section */}
-          {/* <section className='space-y-6'>
-                    <div className='flex items-center justify-between mb-6'>
-                        <div className='flex items-center gap-3'>
-                            <div className='p-3 bg-green-100 dark:bg-green-900/50 rounded-xl'>
-                                <CheckCircle className='w-6 h-6 text-green-600 dark:text-green-400' />
-                            </div>
-                            <h2 className='text-2xl font-bold bg-gradient-to-r from-green-600 to-purple-600 bg-clip-text text-transparent'>
-                                Complete Anime
-                            </h2>
-                        </div>
-                        <div className='flex items-center gap-2 text-green-600 dark:text-green-400'>
-                            <span className='skeleton w-16 h-4 rounded'></span>
-                            <ArrowRight className='w-4 h-4' />
-                        </div>
-                    </div>
-
-                    <AnimeGrid
-                        animes={[]}
-                        loading={true}
-                    />
-                </section> */}
-        </div>
+          <UnifiedGrid items={[]} loading={true} itemType="anime" />
+        </section>
       </main>
     );
   }

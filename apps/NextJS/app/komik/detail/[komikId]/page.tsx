@@ -1,9 +1,6 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
-import useSWR from 'swr';
 import Image from 'next/image';
-import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { PRODUCTION } from '@/lib/url';
 
 import { BackgroundGradient } from '@/components/background/background-gradient';
@@ -66,7 +63,13 @@ interface MangaData {
   recommendations: Recommendation[];
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+async function getMangaDetail(komikId: string): Promise<MangaData> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/komik/detail?komik_id=${komikId}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch manga detail for ${komikId}`);
+  }
+  return res.json();
+}
 
 // --- SKELETON COMPONENT ---
 const DetailPageSkeleton = () => (
@@ -99,20 +102,13 @@ const DetailPageSkeleton = () => (
   </main>
 );
 
-export default function DetailMangaPage() {
-  const router = useRouter();
-  const params = useParams();
-  const komikId = params.komikId as string;
+interface KomikDetailInteractiveProps {
+  manga: MangaData;
+  komikId: string;
+}
 
-  const {
-    data: mangaData,
-    error,
-    isLoading,
-  } = useSWR<MangaData>(
-    komikId ? `/api/komik/detail?komik_id=${komikId}` : null,
-    fetcher
-  );
-
+function KomikDetailInteractive({ manga, komikId }: KomikDetailInteractiveProps) {
+  'use client';
   const [bookmarked, setBookmarked] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -128,7 +124,6 @@ export default function DetailMangaPage() {
   }, [komikId]);
 
   const handleBookmark = () => {
-    if (!mangaData) return;
     let bookmarks = JSON.parse(localStorage.getItem('bookmarks-komik') || '[]');
     const isBookmarked = bookmarks.some(
       (item: { slug: string }) => item.slug === komikId
@@ -141,33 +136,14 @@ export default function DetailMangaPage() {
     } else {
       bookmarks.push({
         slug: komikId,
-        title: mangaData.title,
-        poster: mangaData.poster,
+        title: manga.title,
+        poster: manga.poster,
       });
     }
     localStorage.setItem('bookmarks-komik', JSON.stringify(bookmarks));
     setBookmarked(!isBookmarked);
   };
 
-  if (isLoading) return <DetailPageSkeleton />;
-  if (error || !mangaData)
-    return (
-      <div className='min-h-screen p-6 flex items-center justify-center'>
-        <Card className='max-w-md w-full p-8 text-center'>
-          <AlertTriangle className='w-16 h-16 text-destructive mx-auto mb-4' />
-          <CardHeader>
-            <CardTitle className='text-2xl text-destructive'>
-              Gagal Memuat Data
-            </CardTitle>
-            <CardDescription>
-              Terjadi kesalahan saat mengambil data manga.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    );
-
-  const manga = mangaData;
   const fallback = '/default.png';
   const imageSources = [
     manga.poster?.trim() ? manga.poster : null,
@@ -184,6 +160,65 @@ export default function DetailMangaPage() {
     if (currentIndex < imageSources.length - 1)
       setCurrentIndex(currentIndex + 1);
   };
+
+  return (
+    <div className='w-full md:w-1/3 flex flex-col gap-4 md:sticky top-8'>
+      <Card className='overflow-hidden'>
+        <Image
+          src={imageSources[currentIndex]}
+          alt={manga.title}
+          width={400}
+          height={600}
+          className='object-cover w-full aspect-[2/3]'
+          priority
+          unoptimized
+          onError={handleError}
+        />
+      </Card>
+      <Button
+        onClick={handleBookmark}
+        variant={bookmarked ? 'destructive' : 'default'}
+        size='lg'
+        className='w-full'
+      >
+        <Bookmark className='w-5 h-5 mr-2' />
+        {bookmarked ? 'Hapus Bookmark' : 'Bookmark'}
+      </Button>
+    </div>
+  );
+}
+
+
+export default async function DetailMangaPage({ params }: { params: { komikId: string } }) {
+  let mangaData: MangaData | undefined;
+  let error = false;
+
+  try {
+    mangaData = await getMangaDetail(params.komikId);
+  } catch (e) {
+    console.error(e);
+    error = true;
+  }
+
+  if (error || !mangaData) {
+    return (
+      <div className='min-h-screen p-6 flex items-center justify-center'>
+        <Card className='max-w-md w-full p-8 text-center'>
+          <AlertTriangle className='w-16 h-16 text-destructive mx-auto mb-4' />
+          <CardHeader>
+            <CardTitle className='text-2xl text-destructive'>
+              Gagal Memuat Data
+            </CardTitle>
+            <CardDescription>
+              Terjadi kesalahan saat mengambil data manga.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  const manga = mangaData;
 
   const metadata = [
     {
@@ -225,29 +260,7 @@ export default function DetailMangaPage() {
           <BackgroundGradient className='rounded-[24px] p-0.5'>
             <div className='bg-card text-card-foreground rounded-[22px] p-6 md:p-10'>
               <div className='flex flex-col md:flex-row items-start gap-8'>
-                <div className='w-full md:w-1/3 flex flex-col gap-4 md:sticky top-8'>
-                  <Card className='overflow-hidden'>
-                    <Image
-                      src={imageSources[currentIndex]}
-                      alt={manga.title}
-                      width={400}
-                      height={600}
-                      className='object-cover w-full aspect-[2/3]'
-                      priority
-                      unoptimized
-                      onError={handleError}
-                    />
-                  </Card>
-                  <Button
-                    onClick={handleBookmark}
-                    variant={bookmarked ? 'destructive' : 'default'}
-                    size='lg'
-                    className='w-full'
-                  >
-                    <Bookmark className='w-5 h-5 mr-2' />
-                    {bookmarked ? 'Hapus Bookmark' : 'Bookmark'}
-                  </Button>
-                </div>
+                <KomikDetailInteractive manga={manga} komikId={params.komikId} />
 
                 <div className='w-full md:w-2/3 space-y-6'>
                   <div className='space-y-2'>
@@ -318,20 +331,15 @@ export default function DetailMangaPage() {
                           manga.chapters.map((chapter) => (
                             <Tooltip key={chapter.chapter_id}>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant='ghost'
-                                  onClick={() =>
-                                    router.push(
-                                      `/komik/chapter/${chapter.chapter_id}`
-                                    )
-                                  }
-                                  className='justify-between w-full h-full p-3 whitespace-normal'
+                                <Link
+                                  href={`/komik/chapter/${chapter.chapter_id}`}
+                                  className='justify-between w-full h-full p-3 whitespace-normal flex items-center bg-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors'
                                 >
                                   <p className='line-clamp-2 text-left'>
                                     {chapter.chapter}
                                   </p>
                                   <ArrowRight className='w-4 h-4 ml-2 flex-shrink-0' />
-                                </Button>
+                                </Link>
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p>Rilis: {chapter.date}</p>

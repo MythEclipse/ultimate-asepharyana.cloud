@@ -1,9 +1,4 @@
-'use client';
-
-import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
-import useSWR from 'swr';
 import ComicCard from '@features/komik/ComicGrid';
 import {
   BookOpen,
@@ -37,72 +32,30 @@ export interface Komik {
   slug: string; // Added slug property
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+async function getKomikData(pageNumber: number, type: string): Promise<KomikData> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/komik/${type}?page=${pageNumber}&order=update`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch ${type} data for page ${pageNumber}`);
+  }
+  return res.json();
+}
 
-export default function Page() {
-  const params = useParams();
-  const router = useRouter();
-  const pageNumber = parseInt(params.pageNumber as string, 10);
+export default async function Page({ params }: { params: { pageNumber: string } }) {
+  const pageNumber = parseInt(params.pageNumber, 10);
+  let komikData: KomikData | undefined;
+  let error = false;
 
-  const {
-    data: komikData,
-    error,
-    isLoading,
-  } = useSWR<KomikData>(
-    `/api/komik/manga?page=${pageNumber}&order=update`,
-    fetcher,
-    {
-      revalidateIfStale: true,
-      revalidateOnFocus: false,
-      refreshInterval: 60 * 1000,
+  if (isNaN(pageNumber)) {
+    // Handle invalid page number, e.g., redirect to 404 or a default page
+    // For now, we'll just set error to true
+    error = true;
+  } else {
+    try {
+      komikData = await getKomikData(pageNumber, 'manga');
+    } catch (e) {
+      console.error(e);
+      error = true;
     }
-  );
-
-  useEffect(() => {
-    if (isNaN(pageNumber)) {
-      router.replace('/404');
-    }
-  }, [pageNumber, router]);
-
-  if (isNaN(pageNumber)) return null;
-
-  if (isLoading) {
-    return (
-      <main className='min-h-screen p-6 bg-background dark:bg-dark'>
-        <div className='max-w-7xl mx-auto space-y-8'>
-          <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4'>
-            <div className='flex items-center gap-4'>
-              <div className='p-3 bg-purple-100 dark:bg-purple-900/50 rounded-xl'>
-                <BookOpen className='w-8 h-8 text-purple-600 dark:text-purple-400' />
-              </div>
-              <div>
-                <h1 className='text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent'>
-                  Latest Manga
-                </h1>
-                <p className='text-zinc-600 dark:text-zinc-400 mt-1'>
-                  Halaman {komikData?.pagination?.current_page ?? '-'} dari{' '}
-                  {komikData?.pagination?.last_visible_page ?? '-'}
-                </p>
-              </div>
-            </div>
-            <Link
-              href='/komik/manga/page/1'
-              className='flex items-center gap-2 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors px-4 py-2 rounded-lg bg-purple-50 dark:bg-purple-900/30'
-            >
-              Lihat Semua
-              <ChevronRight className='w-5 h-5' />
-            </Link>
-          </div>
-          <div className='flex flex-col items-center p-4'>
-            <div className='grid grid-cols-3 lg:grid-cols-5 gap-4 w-full'>
-              {Array.from({ length: 40 }).map((_, index) => (
-                <ComicCard key={index} loading2 />
-              ))}
-            </div>
-          </div>
-        </div>
-      </main>
-    );
   }
 
   if (error || !komikData) {

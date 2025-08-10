@@ -1,7 +1,3 @@
-'use client';
-
-import React from 'react';
-import useSWR from 'swr';
 import Link from 'next/link';
 import {
   ChevronLeft,
@@ -11,7 +7,6 @@ import {
 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/ImageWithFallback';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useParams } from 'next/navigation';
 
 interface ChapterDetail {
   title: string;
@@ -21,22 +16,24 @@ interface ChapterDetail {
   images: string[];
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+async function fetchChapterDetail(chapterId: string): Promise<ChapterDetail> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/komik/chapter?chapter_url=${chapterId}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch chapter ${chapterId}`);
+  }
+  return res.json();
+}
 
-export default function ChapterPage() {
-  const { chapterId } = useParams();
-  const {
-    data: chapter,
-    error,
-    isLoading,
-  } = useSWR<ChapterDetail>(
-    `/api/komik/chapter?chapter_url=${chapterId}`,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-      shouldRetryOnError: false,
-    }
-  );
+export default async function ChapterPage({ params }: { params: { chapterId: string } }) {
+  let chapter: ChapterDetail | undefined;
+  let error = false;
+
+  try {
+    chapter = await fetchChapterDetail(params.chapterId);
+  } catch (e) {
+    console.error(e);
+    error = true;
+  }
 
   if (error) {
     return (
@@ -55,6 +52,9 @@ export default function ChapterPage() {
       </main>
     );
   }
+
+  // Determine if content is loading based on whether chapter data is available
+  const isLoading = !chapter;
 
   return (
     <main className='min-h-screen p-4 md:p-6 bg-background dark:bg-dark'>
@@ -154,45 +154,6 @@ export default function ChapterPage() {
             ))}
       </div>
 
-      {/* Navigation Bottom (Fixed) */}
-      {/* <div className="fixed bottom-0 left-0 right-0 bg-background/95 dark:bg-dark/95 backdrop-blur border-t border-zinc-200 dark:border-zinc-800">
-        <div className="max-w-7xl mx-auto p-4">
-          <div className="flex justify-between items-center gap-4">
-            <div className="flex-1 flex justify-start">
-              {chapter?.prev_chapter_id && (
-                <Link
-                  scroll
-                  href={`/komik/chapter/${chapter.prev_chapter_id}`}
-                  className="flex items-center gap-2 text-sm px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Sebelumnya
-                </Link>
-              )}
-            </div>
-
-            <Link
-              href={`/komik/detail/${chapter?.list_chapter}`}
-              className="flex items-center gap-2 text-sm px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-            >
-              <BookOpen className="w-4 h-4" />
-            </Link>
-
-            <div className="flex-1 flex justify-end">
-              {chapter?.next_chapter_id && (
-                <Link
-                  scroll
-                  href={`/komik/chapter/${chapter.next_chapter_id}`}
-                  className="flex items-center gap-2 text-sm px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-                >
-                  Selanjutnya
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </div> */}
       <div className='p-6'>
         <div className='flex flex-col md:flex-row gap-4 items-stretch'>
           {/* Previous Button */}

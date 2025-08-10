@@ -1,9 +1,10 @@
-'use client';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import UnifiedGrid from 'components/UnifiedGrid';
-import ButtonA from '@core/ui/ScrollButton';
+import BookmarkPagination from 'components/komik/BookmarkPagination';
+import { Bookmark, AlertTriangle, Info } from 'lucide-react';
+import Link from 'next/link';
 
-interface Bookmark {
+interface BookmarkItem {
   title: string;
   poster: string;
   chapter: string;
@@ -21,43 +22,29 @@ interface Pagination {
   has_previous_page: boolean;
 }
 
-export default function BookmarkPage() {
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
-  const [pagination, setPagination] = useState<Pagination>({
-    current_page: 1,
-    last_visible_page: 1,
-    has_next_page: false,
-    has_previous_page: false,
-  });
-  const [isLoading, setIsLoading] = useState(true);
+const ITEMS_PER_PAGE = 25;
 
-  const ITEMS_PER_PAGE = 25;
+function getBookmarksFromLocalStorage(): BookmarkItem[] {
+  if (typeof window !== 'undefined') {
+    return JSON.parse(localStorage.getItem('bookmarks-komik') || '[]');
+  }
+  return [];
+}
 
-  useEffect(() => {
-    const storedBookmarks = JSON.parse(
-      localStorage.getItem('bookmarks-komik') || '[]'
-    );
-    setBookmarks(storedBookmarks);
-    setIsLoading(false);
-  }, []);
+export default async function BookmarkPage({ params }: { params: { slug: string } }) {
+  const page = parseInt(params.slug, 10) || 1;
 
-  useEffect(() => {
-    const totalPages = Math.ceil(bookmarks.length / ITEMS_PER_PAGE);
-    const currentPage = Math.min(pagination.current_page, totalPages || 1);
+  // On the server, bookmarks will be empty initially. They will load on the client.
+  const bookmarks: BookmarkItem[] = getBookmarksFromLocalStorage();
 
-    setPagination({
-      current_page: currentPage,
-      last_visible_page: totalPages,
-      has_next_page: currentPage < totalPages,
-      has_previous_page: currentPage > 1,
-    });
-  }, [bookmarks, pagination.current_page]);
+  const totalPages = Math.ceil(bookmarks.length / ITEMS_PER_PAGE);
+  const currentPage = Math.min(page, totalPages || 1);
 
-  const handlePageChange = (newPage: number) => {
-    setPagination((prev) => ({
-      ...prev,
-      current_page: Math.max(1, Math.min(newPage, prev.last_visible_page)),
-    }));
+  const pagination: Pagination = {
+    current_page: currentPage,
+    last_visible_page: totalPages,
+    has_next_page: currentPage < totalPages,
+    has_previous_page: currentPage > 1,
   };
 
   const getPaginatedBookmarks = () => {
@@ -66,73 +53,57 @@ export default function BookmarkPage() {
     return bookmarks.slice(start, end);
   };
 
-  if (isLoading) {
+  // On server render, bookmarks.length will be 0, so it will show loading or empty message.
+  // On client hydration, it will re-render with actual bookmarks.
+  if (bookmarks.length === 0 && typeof window !== 'undefined') {
     return (
-      <main className='p-6'>
-        <h1 className='dark:text-lighta text-2xl font-bold mt-8 mb-4'>
-          Bookmarked Comic ({bookmarks.length})
-        </h1>
-        <UnifiedGrid loading={true} items={[]} itemType="komik" />
-        <div className='flex flex-wrap gap-4 justify-between items-center mt-8 animate-pulse'>
-          <div className='flex gap-4'>
-            <div className='w-24 h-10 bg-zinc-200 dark:bg-zinc-700 rounded-lg' />
-            <div className='w-24 h-10 bg-zinc-200 dark:bg-zinc-700 rounded-lg' />
+      <main className='min-h-screen p-6 bg-background text-foreground'>
+        <div className='max-w-7xl mx-auto space-y-8'>
+          <div className='flex items-center gap-4'>
+            <div className='p-3 bg-purple-100 dark:bg-purple-900/50 rounded-xl'>
+              <Bookmark className='w-8 h-8 text-purple-600 dark:text-purple-400' />
+            </div>
+            <h1 className='text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent'>
+              My Bookmarks (0)
+            </h1>
           </div>
-          <div className='w-32 h-4 bg-zinc-200 dark:bg-zinc-700 rounded-full' />
+          <div className='p-4 sm:p-6 bg-blue-100 dark:bg-blue-900/30 rounded-xl sm:rounded-2xl flex items-center gap-3 sm:gap-4'>
+            <Info className='w-8 h-8 text-blue-600 dark:text-blue-400' />
+            <h3 className='text-base sm:text-lg font-medium text-blue-800 dark:text-blue-200'>
+              No Bookmarked Comic yet.
+            </h3>
+          </div>
         </div>
       </main>
     );
   }
 
-  if (bookmarks.length === 0) {
-    return (
-      <main className='p-6'>
-        <h1 className='text-2xl font-bold mt-8 mb-4'>No Bookmarked Comic</h1>
-        <p>You have not bookmarked any Comic yet.</p>
-      </main>
-    );
-  }
-
   return (
-    <main className='p-6'>
-      <h1 className='dark:text-lighta text-2xl font-bold mt-8 mb-4'>
-        Bookmarked Comic ({bookmarks.length})
-      </h1>
-      <UnifiedGrid items={getPaginatedBookmarks()} itemType="komik" />
-      <PaginationComponent
-        pagination={pagination}
-        onPageChange={handlePageChange}
-      />
+    <main className='min-h-screen p-6 bg-background text-foreground'>
+      <div className='max-w-7xl mx-auto space-y-8'>
+        <div className='flex items-center gap-4'>
+          <div className='p-3 bg-purple-100 dark:bg-purple-900/50 rounded-xl'>
+            <Bookmark className='w-8 h-8 text-purple-600 dark:text-purple-400' />
+          </div>
+          <h1 className='text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent'>
+            My Bookmarks ({bookmarks.length})
+          </h1>
+        </div>
+
+        {bookmarks.length > 0 ? (
+          <>
+            <UnifiedGrid items={getPaginatedBookmarks()} itemType="komik" />
+            <BookmarkPagination pagination={pagination} baseUrl="/komik/bookmark" />
+          </>
+        ) : (
+          <div className='p-4 sm:p-6 bg-blue-100 dark:bg-blue-900/30 rounded-xl sm:rounded-2xl flex items-center gap-3 sm:gap-4'>
+            <Info className='w-8 h-8 text-blue-600 dark:text-blue-400' />
+            <h3 className='text-base sm:text-lg font-medium text-blue-800 dark:text-blue-200'>
+              No Bookmarked Comic yet.
+            </h3>
+          </div>
+        )}
+      </div>
     </main>
   );
 }
-
-const PaginationComponent = ({
-  pagination,
-  onPageChange,
-}: {
-  pagination: Pagination;
-  onPageChange: (page: number) => void;
-}) => {
-  return (
-    <div className='flex justify-between mt-8'>
-      <div className='flex gap-4'>
-        {pagination.has_previous_page && (
-          <ButtonA onClick={() => onPageChange(pagination.current_page - 1)}>
-            Previous
-          </ButtonA>
-        )}
-
-        {pagination.has_next_page && (
-          <ButtonA onClick={() => onPageChange(pagination.current_page + 1)}>
-            Next
-          </ButtonA>
-        )}
-      </div>
-
-      <div className='text-gray-600 dark:text-gray-400'>
-        Page {pagination.current_page} of {pagination.last_visible_page}
-      </div>
-    </div>
-  );
-};

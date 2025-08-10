@@ -1,9 +1,9 @@
-'use client';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import AnimeGrid from '@features/anime/AnimeGrid';
 import BookmarkLoadingSkeleton from '@/components/skeleton/BookmarkLoadingSkeleton';
 import EmptyBookmarkMessage from '@/components/misc/EmptyBookmarkMessage';
 import { Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 
 const ITEMS_PER_PAGE = 24;
 
@@ -20,41 +20,23 @@ interface Pagination {
   has_previous_page: boolean;
 }
 
-export default function BookmarkPage() {
-  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
-  const [pagination, setPagination] = useState<Pagination>({
-    current_page: 1,
-    last_visible_page: 1,
-    has_next_page: false,
-    has_previous_page: false,
-  });
-  const [isLoading, setIsLoading] = useState(true);
+export default async function BookmarkPage({ params }: { params: { slug: string } }) {
+  const page = parseInt(params.slug, 10) || 1;
 
-  useEffect(() => {
-    const storedBookmarks = JSON.parse(
-      localStorage.getItem('bookmarks-anime') || '[]'
-    );
-    setBookmarks(storedBookmarks);
-    setIsLoading(false);
-  }, []);
+  const getBookmarks = () => {
+    if (typeof window === 'undefined') return [];
+    return JSON.parse(localStorage.getItem('bookmarks-anime') || '[]');
+  };
 
-  useEffect(() => {
-    const totalPages = Math.ceil(bookmarks.length / ITEMS_PER_PAGE);
-    const currentPage = Math.min(pagination.current_page, totalPages || 1);
+  const bookmarks: BookmarkItem[] = getBookmarks();
+  const totalPages = Math.ceil(bookmarks.length / ITEMS_PER_PAGE);
+  const currentPage = Math.min(page, totalPages || 1);
 
-    setPagination({
-      current_page: currentPage,
-      last_visible_page: totalPages,
-      has_next_page: currentPage < totalPages,
-      has_previous_page: currentPage > 1,
-    });
-  }, [bookmarks, pagination.current_page]);
-
-  const handlePageChange = (newPage: number) => {
-    setPagination((prev) => ({
-      ...prev,
-      current_page: Math.max(1, Math.min(newPage, prev.last_visible_page)),
-    }));
+  const pagination: Pagination = {
+    current_page: currentPage,
+    last_visible_page: totalPages,
+    has_next_page: currentPage < totalPages,
+    has_previous_page: currentPage > 1,
   };
 
   const getPaginatedBookmarks = () => {
@@ -63,7 +45,7 @@ export default function BookmarkPage() {
     return bookmarks.slice(start, end);
   };
 
-  if (isLoading) {
+  if (typeof window === 'undefined') {
     return <BookmarkLoadingSkeleton />;
   }
 
@@ -88,27 +70,25 @@ export default function BookmarkPage() {
             <div className='flex flex-wrap gap-4 justify-between items-center mt-8'>
               <div className='flex gap-4'>
                 {pagination.has_previous_page && (
-                  <button
-                    onClick={() =>
-                      handlePageChange(pagination.current_page - 1)
-                    }
-                    className='px-6 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors flex items-center gap-2'
-                  >
-                    <ChevronLeft className='w-5 h-5' />
-                    Previous
-                  </button>
+                  <Link href={`/anime/bookmark/${pagination.current_page - 1}`}>
+                    <button
+                      className='px-6 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors flex items-center gap-2'
+                    >
+                      <ChevronLeft className='w-5 h-5' />
+                      Previous
+                    </button>
+                  </Link>
                 )}
 
                 {pagination.has_next_page && (
-                  <button
-                    onClick={() =>
-                      handlePageChange(pagination.current_page + 1)
-                    }
-                    className='px-6 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors flex items-center gap-2'
-                  >
-                    Next
-                    <ChevronRight className='w-5 h-5' />
-                  </button>
+                  <Link href={`/anime/bookmark/${pagination.current_page + 1}`}>
+                    <button
+                      className='px-6 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors flex items-center gap-2'
+                    >
+                      Next
+                      <ChevronRight className='w-5 h-5' />
+                    </button>
+                  </Link>
                 )}
               </div>
 

@@ -1,9 +1,5 @@
-'use client';
-
-import React, { useState, useEffect, use } from 'react';
-import useSWR from 'swr';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link'; // Added Link for navigation
 import { PRODUCTION } from '@/lib/url';
 
 import { BackgroundGradient } from '@/components/background/background-gradient';
@@ -72,8 +68,6 @@ interface AnimeData {
   };
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
 const DetailPageSkeleton = () => (
   <main className='p-4 md:p-8 min-h-screen'>
     <div className='max-w-6xl mx-auto'>
@@ -116,89 +110,48 @@ const DetailPageSkeleton = () => (
   </main>
 );
 
-export default function DetailAnimePage({
+export default async function DetailAnimePage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }) {
-  const { slug } = use(params);
-  const router = useRouter();
+  const { slug } = params;
+  const API_URL = process.env.NEXT_PUBLIC_URL;
 
-  const { data: anime, error } = useSWR<AnimeData>(
-    slug ? `/api/anime/detail/${slug}` : null,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 60000,
+  let anime: AnimeData | null = null;
+  let error: unknown = null;
+
+  try {
+    const res = await fetch(`${API_URL}/api/anime/detail/${slug}`);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch data: ${res.statusText}`);
     }
-  );
+    anime = await res.json();
+  } catch (e) {
+    console.error('Error fetching anime data:', e);
+    error = e;
+  }
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [bookmarked, setBookmarked] = useState(false);
-
-  useEffect(() => {
-    if (anime?.data.episode_lists) {
-      anime.data.episode_lists.forEach((episode) => {
-        router.prefetch(`/anime/full/${episode.slug}`);
-      });
-    }
-  }, [anime, router]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const bookmarks = JSON.parse(
-        localStorage.getItem('bookmarks-anime') || '[]'
-      );
-      setBookmarked(
-        bookmarks.some((item: { slug: string }) => item.slug === slug)
-      );
-    }
-  }, [slug]);
-
-  const handleBookmark = () => {
-    let bookmarks = JSON.parse(localStorage.getItem('bookmarks-anime') || '[]');
-    const isBookmarked = bookmarks.some(
-      (item: { slug: string }) => item.slug === slug
-    );
-
-    if (isBookmarked) {
-      bookmarks = bookmarks.filter(
-        (item: { slug: string }) => item.slug !== slug
-      );
-    } else if (anime?.data) {
-      bookmarks.push({
-        slug,
-        title: anime.data.title,
-        poster: anime.data.poster,
-      });
-    }
-    localStorage.setItem('bookmarks-anime', JSON.stringify(bookmarks));
-    setBookmarked(!isBookmarked);
-  };
-
-  const imageSources = [
-    anime?.data.poster,
-    anime?.data.poster
-      ? `https://imagecdn.app/v1/images/${encodeURIComponent(anime.data.poster)}`
-      : null,
-    anime?.data.poster
-      ? `${PRODUCTION}/api/imageproxy?url=${encodeURIComponent(anime.data.poster)}`
-      : null,
-    '/default.png',
-  ].filter(Boolean) as string[];
-
-  const handleImageError = () => {
-    if (currentImageIndex < imageSources.length - 1) {
-      setCurrentImageIndex(currentImageIndex + 1);
-    }
-  };
-
-  if (error)
+  if (error) {
     return (
-      <p className='text-destructive text-center p-8'>
-        Failed to load anime data.
-      </p>
+      <main className='min-h-screen p-6 bg-background dark:bg-dark'>
+        <div className='max-w-7xl mx-auto mt-12'>
+          <div className='p-6 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center gap-4'>
+            <AlertTriangle className='w-8 h-8 text-red-600 dark:text-red-400' />
+            <div>
+              <h1 className='text-2xl font-bold text-red-800 dark:text-red-200 mb-2'>
+                Error Loading Data
+              </h1>
+              <p className='text-red-700 dark:text-red-300'>
+                Could not fetch data from the API. Please try again later.
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
     );
+  }
+
   if (!anime) return <DetailPageSkeleton />;
 
   const { data } = anime;
@@ -233,27 +186,12 @@ export default function DetailAnimePage({
             <div className='bg-card text-card-foreground rounded-[22px] p-6 md:p-10'>
               <div className='flex flex-col md:flex-row items-start gap-8'>
                 <div className='w-full md:w-1/3 flex flex-col gap-4 md:sticky top-8'>
-                  <Card className='overflow-hidden'>
-                    <Image
-                      src={imageSources[currentImageIndex]}
-                      alt={data.title}
-                      width={400}
-                      height={600}
-                      className='object-cover w-full aspect-[2/3]'
-                      priority
-                      onError={handleImageError}
-                      unoptimized
-                    />
-                  </Card>
-                  <Button
-                    onClick={handleBookmark}
-                    variant={bookmarked ? 'destructive' : 'default'}
-                    size='lg'
-                    className='w-full'
-                  >
-                    <Bookmark className='w-5 h-5 mr-2' />
-                    {bookmarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}
-                  </Button>
+                  {/* Image and Bookmark Button will be in a client component */}
+                  <ImageDisplayAndBookmark
+                    poster={data.poster}
+                    title={data.title}
+                    slug={slug}
+                  />
                 </div>
 
                 <div className='w-full md:w-2/3 space-y-6'>
@@ -317,21 +255,23 @@ export default function DetailAnimePage({
                           data.episode_lists.map((episode) => (
                             <Tooltip key={episode.slug}>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant='ghost'
-                                  onClick={() =>
-                                    router.push(`/anime/full/${episode.slug}`)
-                                  }
+                                <Link
+                                  href={`/anime/full/${episode.slug}`}
                                   className='justify-between w-full h-full p-3 whitespace-normal'
                                 >
-                                  <div className='flex items-start gap-2 min-w-0'>
-                                    <Clapperboard className='w-4 h-4 mt-1 flex-shrink-0' />
-                                    <p className='line-clamp-3 text-left'>
-                                      {episode.episode}
-                                    </p>
-                                  </div>
-                                  <ArrowRight className='w-4 h-4 self-center flex-shrink-0' />
-                                </Button>
+                                  <Button
+                                    variant='ghost'
+                                    className='justify-between w-full h-full p-3 whitespace-normal'
+                                  >
+                                    <div className='flex items-start gap-2 min-w-0'>
+                                      <Clapperboard className='w-4 h-4 mt-1 flex-shrink-0' />
+                                      <p className='line-clamp-3 text-left'>
+                                        {episode.episode}
+                                      </p>
+                                    </div>
+                                    <ArrowRight className='w-4 h-4 self-center flex-shrink-0' />
+                                  </Button>
+                                </Link>
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p>{episode.episode}</p>
@@ -383,3 +323,94 @@ export default function DetailAnimePage({
     </TooltipProvider>
   );
 }
+
+// Client Component for Image Display and Bookmark functionality
+import { useState, useEffect } from 'react';
+import { AlertTriangle } from 'lucide-react'; // Import AlertTriangle
+'use client';
+
+interface ImageDisplayAndBookmarkProps {
+  poster: string;
+  title: string;
+  slug: string;
+}
+
+const ImageDisplayAndBookmark = ({ poster, title, slug }: ImageDisplayAndBookmarkProps) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [bookmarked, setBookmarked] = useState(false);
+
+  const imageSources = [
+    poster,
+    poster
+      ? `https://imagecdn.app/v1/images/${encodeURIComponent(poster)}`
+      : null,
+    poster
+      ? `${PRODUCTION}/api/imageproxy?url=${encodeURIComponent(poster)}`
+      : null,
+    '/default.png',
+  ].filter(Boolean) as string[];
+
+  const handleImageError = () => {
+    if (currentImageIndex < imageSources.length - 1) {
+      setCurrentImageIndex(currentImageIndex + 1);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const bookmarks = JSON.parse(
+        localStorage.getItem('bookmarks-anime') || '[]'
+      );
+      setBookmarked(
+        bookmarks.some((item: { slug: string }) => item.slug === slug)
+      );
+    }
+  }, [slug]);
+
+  const handleBookmark = () => {
+    let bookmarks = JSON.parse(localStorage.getItem('bookmarks-anime') || '[]');
+    const isBookmarked = bookmarks.some(
+      (item: { slug: string }) => item.slug === slug
+    );
+
+    if (isBookmarked) {
+      bookmarks = bookmarks.filter(
+        (item: { slug: string }) => item.slug !== slug
+      );
+    } else {
+      bookmarks.push({
+        slug,
+        title,
+        poster,
+      });
+    }
+    localStorage.setItem('bookmarks-anime', JSON.stringify(bookmarks));
+    setBookmarked(!isBookmarked);
+  };
+
+  return (
+    <>
+      <Card className='overflow-hidden'>
+        <Image
+          src={imageSources[currentImageIndex]}
+          alt={title}
+          width={400}
+          height={600}
+          className='object-cover w-full aspect-[2/3]'
+          priority
+          onError={handleImageError}
+          unoptimized
+        />
+      </Card>
+      <Button
+        onClick={handleBookmark}
+        variant={bookmarked ? 'destructive' : 'default'}
+        size='lg'
+        className='w-full'
+      >
+        <Bookmark className='w-5 h-5 mr-2' />
+        {bookmarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}
+      </Button>
+    </>
+  );
+};

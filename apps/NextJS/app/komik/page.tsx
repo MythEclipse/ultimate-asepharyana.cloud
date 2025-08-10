@@ -1,7 +1,4 @@
-'use client';
-
 import React, { memo } from 'react';
-import useSWR from 'swr';
 import Link from 'next/link';
 import UnifiedGrid from 'components/UnifiedGrid';
 import { BookOpen, AlertTriangle, Info, ArrowRight } from 'lucide-react';
@@ -16,30 +13,33 @@ export interface Komik {
   slug: string;
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+interface KomikData {
+  data: Komik[];
+}
 
-function HomePage() {
-  const { data: manga, error: mangaError } = useSWR(
-    `/api/komik/manga?page=1&order=update`,
-    fetcher
-  );
-  const { data: manhua, error: manhuaError } = useSWR(
-    `/api/komik/manhua?page=1&order=update`,
-    fetcher
-  );
-  const { data: manhwa, error: manhwaError } = useSWR(
-    `/api/komik/manhwa?page=1&order=update`,
-    fetcher
-  );
+async function fetchKomikData(type: string): Promise<KomikData> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/komik/${type}?page=1&order=update`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch ${type} data`);
+  }
+  return res.json();
+}
 
-  const error = mangaError || manhuaError || manhwaError;
+export default async function HomePage() {
+  let manga: KomikData | undefined;
+  let manhua: KomikData | undefined;
+  let manhwa: KomikData | undefined;
+  let error = false;
 
-  // Menentukan status loading untuk setiap kategori
-  const isLoading = {
-    Manga: !manga && !mangaError,
-    Manhua: !manhua && !manhuaError,
-    Manhwa: !manhwa && !manhwaError,
-  };
+  try {
+    manga = await fetchKomikData('manga');
+    manhua = await fetchKomikData('manhua');
+    manhwa = await fetchKomikData('manhwa');
+  } catch (e) {
+    console.error(e);
+    error = true;
+  }
+
   // const Skeleton = () => (
   //   <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
   //     {[...Array(40)].map((_, i) => (
@@ -107,9 +107,7 @@ function HomePage() {
                     </Link>
                   </div>
 
-                  {isLoading[type as keyof typeof isLoading] ? (
-                    <UnifiedGrid loading={true} items={[]} itemType="komik" />
-                  ) : komiks ? (
+                  {komiks ? (
                     komiks.length > 0 ? (
                       <UnifiedGrid
                         items={komiks.map((comic: Komik) => ({
@@ -127,7 +125,7 @@ function HomePage() {
                         </h3>
                       </div>
                     )
-                  ) : null}
+                  ) : <UnifiedGrid loading={true} items={[]} itemType="komik" />}
                 </section>
               );
             })}
@@ -137,5 +135,3 @@ function HomePage() {
     </main>
   );
 }
-
-export default memo(HomePage);

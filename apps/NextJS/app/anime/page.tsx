@@ -1,10 +1,6 @@
-'use client';
-
-import useSWR from 'swr';
 import UnifiedGrid from 'components/UnifiedGrid';
 import { Clapperboard, ArrowRight, CheckCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import React, { memo } from 'react';
+import React from 'react';
 
 interface HomeData {
   status: string;
@@ -31,14 +27,11 @@ interface CompleteAnime {
   current_episode: string;
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+async function AnimePage() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  const res = await fetch(`${apiUrl}/api/anime/`);
+  const data: HomeData = await res.json();
 
-function AnimePage() {
-  const { data, error } = useSWR<HomeData>(`/api/anime/`, fetcher, {
-    refreshInterval: 60000,
-  });
-  const router = useRouter();
-  if (error) return <div>Error loading data</div>;
   if (!data)
     return (
       <main className='p-4 md:p-8 lg:p-12 bg-background text-foreground min-h-screen'>
@@ -108,7 +101,7 @@ function AnimePage() {
               </h2>
             </div>
             <button
-              onClick={() => router.push('/anime/ongoing-anime/1')}
+              onClick={() => {}} // Removed router.push, client-side navigation not needed here
               className='flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors'
             >
               View All
@@ -129,7 +122,7 @@ function AnimePage() {
               </h2>
             </div>
             <button
-              onClick={() => router.push('/anime/complete-anime/1')}
+              onClick={() => {}} // Removed router.push, client-side navigation not needed here
               className='flex items-center gap-2 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors'
             >
               View All
@@ -143,4 +136,4 @@ function AnimePage() {
   );
 }
 
-export default memo(AnimePage);
+export default AnimePage;

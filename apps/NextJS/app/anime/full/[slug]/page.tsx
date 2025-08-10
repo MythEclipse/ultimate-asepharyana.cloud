@@ -1,7 +1,3 @@
-'use client';
-
-import { useParams } from 'next/navigation';
-import useSWR from 'swr';
 import Link from 'next/link';
 import ClientPlayer from '@/components/misc/ClientPlayer';
 import { Button } from '@/components/ui/button';
@@ -44,8 +40,6 @@ interface EpisodeInfo {
   slug: string;
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
 // --- SKELETON COMPONENT ---
 const PlayerPageSkeleton = () => (
   <main className='p-4 md:p-8'>
@@ -81,21 +75,24 @@ const PlayerPageSkeleton = () => (
 );
 
 // --- MAIN COMPONENT ---
-export default function WatchAnimePage() {
-  const params = useParams();
-  const slug = params.slug as string;
+export default async function WatchAnimePage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
+  const API_URL = process.env.NEXT_PUBLIC_URL;
 
-  // --- Menggunakan kembali cara fetch SWR yang lama ---
-  const { data, error, isLoading } = useSWR<AnimeResponse | null>(
-    `/api/anime/full/${slug}`,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
+  let data: AnimeResponse | null = null;
+  let error: unknown = null;
+
+  try {
+    const res = await fetch(`${API_URL}/api/anime/full/${slug}`);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch data: ${res.statusText}`);
     }
-  );
+    data = await res.json();
+  } catch (e) {
+    console.error('Error fetching anime data:', e);
+    error = e;
+  }
 
-  if (isLoading) return <PlayerPageSkeleton />;
   if (error || !data || data.status !== 'Ok') {
     return (
       <main className='p-4 md:p-8 flex items-center justify-center min-h-[70vh]'>
