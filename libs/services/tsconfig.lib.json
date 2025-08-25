@@ -1,17 +1,11 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/libs/services",
-    "rootDir": ".",
+    "baseUrl": ".",
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "types": [
-      "node",
-      "@nx/react/typings/cssmodule.d.ts",
-      "@nx/react/typings/image.d.ts",
-      "vite/client"
-    ]
+    "types": ["node"]
   },
   "exclude": [
     "**/*.spec.ts",
@@ -39,5 +33,5 @@
     "**/*.stories.jsx",
     "**/*.stories.tsx"
   ],
-  "include": ["index.ts", "src/lib/**/*.ts"]
+  "include": ["src/index.ts", "src/lib/**/*.ts"]
 }
